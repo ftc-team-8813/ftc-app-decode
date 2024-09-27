@@ -14,9 +14,6 @@ public class Odometry {
     private final MotorEx front_right;
     private final MotorEx back_left;
     private final MotorEx back_right;
-    private final Servo center_odometry;
-    private final Servo left_odometry;
-    private final Servo right_odometry;
 
     private final HolonomicIMUOdometry odometry;
 
@@ -35,9 +32,6 @@ public class Odometry {
         this.front_right = front_right;
         this.back_left = back_left;
         this.back_right = back_right;
-        this.center_odometry = center_odometry;
-        this.left_odometry = left_odometry;
-        this.right_odometry = right_odometry;
 
         left_odometer = back_left.encoder.setDistancePerPulse(DISTANCE_PER_PULSE);
         right_odometer = front_left.encoder.setDistancePerPulse(DISTANCE_PER_PULSE);
@@ -74,18 +68,6 @@ public class Odometry {
         left_odometer.reset();
         right_odometer.reset();
         center_odometer.reset();
-    }
-
-    public void Up() {
-        center_odometry.setPosition(0);
-        left_odometry.setPosition(0.137);
-        right_odometry.setPosition(1);
-    }
-
-    public void Down() {
-        center_odometry.setPosition(0.36);
-        left_odometry.setPosition(0.566);
-        right_odometry.setPosition(0.53);
     }
 
 }
