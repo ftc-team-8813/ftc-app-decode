@@ -50,10 +50,6 @@ public class Drivetrain {
     public static double turn_max_i_sum = 1;
     public static double turn_clip = 1;
 
-    public static double cs_turn_kp = 0.0058;
-    public static double cs_turn_ki = 0.09;
-    public static double cs_strafe_kp = 0.063;
-
     private final PID forward_pid = new PID(forward_kp,forward_ki,forward_kd,0.2,1,forward_a);
     private final PID strafe_pid = new PID(strafe_kp,strafe_ki,strafe_kd,0.2,1,strafe_a);
     private final PID turn_pid = new PID(turn_kp,turn_ki,turn_kd,0.2,turn_max_i_sum,turn_a);
@@ -63,8 +59,6 @@ public class Drivetrain {
     public static double minimum = 0.137;
     public static double maximum = 1;
     public static double feed_forward = 1;
-
-    private final MotionProfile strafe_cs = new MotionProfile(rise_slope,fall_slope,minimum,maximum);
 
     private double forward = 0;
     private double strafe = 0;
@@ -199,7 +193,7 @@ public class Drivetrain {
 
     }
 
-    public void update(Pose2d odo, Telemetry telemetry, boolean motionProfile, int id, boolean rise, boolean fall, double voltage) {
+    public void update(Pose2d odo, Telemetry telemetry, boolean motionProfile, int id) {
         double heading = getHeading();
 
         heading_delta = heading - heading_was;

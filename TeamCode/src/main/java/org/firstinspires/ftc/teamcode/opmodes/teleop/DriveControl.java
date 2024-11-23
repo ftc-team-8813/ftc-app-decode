@@ -74,7 +74,6 @@ public class DriveControl extends ControlModule {
     @Override
     public void initialize(Robot robot, ControllerMap controllerMap, ControlMgr manager) {
         this.drivetrain = robot.drivetrain;
-        this.odometry = robot.odometry;
 
         ax_drive_left_x = controllerMap.getAxisMap("drive:left_x", "gamepad1", "left_stick_x");
         ax_drive_left_y = controllerMap.getAxisMap("drive:right_y", "gamepad1", "left_stick_y");
@@ -96,7 +95,6 @@ public class DriveControl extends ControlModule {
 
     @Override
     public void init_loop(Telemetry telemetry) {
-        odometry.Up();
     }
 
     @Override
@@ -164,9 +162,9 @@ public class DriveControl extends ControlModule {
             forward += y;
             strafe += x;
             turn += rx;
-
-            drivetrain.autoMove(forward,strafe,turn,0,0,0,odometryPose,telemetry);
-            drivetrain.update(odometryPose, telemetry,false, 0, false, false, 0);
+//
+//            drivetrain.autoMove(forward,strafe,turn,0,0,0,odometryPose,telemetry);
+//            drivetrain.update(odometryPose, telemetry,false, 0, false, false, 0);
         }
         else if (field_centric) {
             drivetrain.move(rotY, rotX, rx, (heading_delta * 0.001), denominator);

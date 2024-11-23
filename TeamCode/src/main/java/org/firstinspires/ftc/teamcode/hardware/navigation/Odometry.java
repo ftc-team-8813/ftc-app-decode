@@ -27,7 +27,7 @@ public class Odometry {
     private final double TICKS_PER_REV = 8192;
     private final double DISTANCE_PER_PULSE = Math.PI * WHEEL_DIAMETER / TICKS_PER_REV;
 
-    public Odometry(MotorEx front_left, MotorEx front_right, MotorEx back_left, MotorEx back_right, Servo center_odometry,Servo left_odometry,Servo right_odometry) {
+    public Odometry(MotorEx front_left, MotorEx front_right, MotorEx back_left, MotorEx back_right) {
         this.front_left = front_left;
         this.front_right = front_right;
         this.back_left = back_left;

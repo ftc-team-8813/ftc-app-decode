@@ -115,14 +115,14 @@ android {
     }
     sourceSets.main {
         jni.srcDirs = []
-        jniLibs.srcDirs rootProject.file('libs'), project(':opencv-sdk').file('native/libs')
+        jniLibs.srcDirs rootProject.file('libs')
     }
     ndkVersion '21.3.6528147'
 }
 
 repositories {
     flatDir {
-        dirs rootProject.file('libs'), project(':opencv-sdk').file('native/libs')
+        dirs rootProject.file('libs')
     }
 }
 
