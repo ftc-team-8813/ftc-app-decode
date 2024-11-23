@@ -21,7 +21,6 @@ public class DriveControl extends ControlModule {
     private ControllerMap.AxisEntry ax_drive_right_x;
     private ControllerMap.AxisEntry ax_horizontal_left_x;
     private ControllerMap.AxisEntry ax_slow;
-    private ControllerMap.ButtonEntry right_trigger;
     private ControllerMap.ButtonEntry dpad_up;
     private ControllerMap.ButtonEntry dpad_down;
     private ControllerMap.ButtonEntry dpad_left;
@@ -81,8 +80,6 @@ public class DriveControl extends ControlModule {
         ax_slow = controllerMap.getAxisMap("drive:slow", "gamepad1", "left_trigger");
 
         ax_horizontal_left_x = controllerMap.getAxisMap("horizontal:left_x", "gamepad2", "left_stick_x");
-
-//        right_trigger = controllerMap.getButtonMap("drive:right_trigger", "gamepad1","right_trigger");
 
         dpad_up = controllerMap.getButtonMap("drive:dpad_up", "gamepad1","dpad_up");
         dpad_down = controllerMap.getButtonMap("drive:dpad_down", "gamepad1","dpad_down");

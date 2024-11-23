@@ -28,7 +28,7 @@ public class Intake {
         intake_spinner.setPower(pow);
     }
 
-    public void setIntakeRotatorPosition(double pos) {
+    public void setRotatorPosition(double pos) {
         intake_rotator.setPosition(pos);
     }
 
