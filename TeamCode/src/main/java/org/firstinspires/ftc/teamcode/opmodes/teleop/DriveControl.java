@@ -1,20 +1,16 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
 import org.firstinspires.ftc.teamcode.hardware.Robot;
-import org.firstinspires.ftc.teamcode.hardware.navigation.Odometry;
 import org.firstinspires.ftc.teamcode.hardware.navigation.PID;
 import org.firstinspires.ftc.teamcode.input.ControllerMap;
 
 public class DriveControl extends ControlModule {
 
     private Drivetrain drivetrain;
-    private Odometry odometry;
 
     private ControllerMap.AxisEntry ax_drive_left_x;
     private ControllerMap.AxisEntry ax_drive_left_y;
@@ -153,17 +149,7 @@ public class DriveControl extends ControlModule {
 
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
-        if (smooth) {
-            odometry.updatePose(-drivetrain.getHeading());
-            Pose2d odometryPose = odometry.getPose();
-            forward += y;
-            strafe += x;
-            turn += rx;
-//
-//            drivetrain.autoMove(forward,strafe,turn,0,0,0,odometryPose,telemetry);
-//            drivetrain.update(odometryPose, telemetry,false, 0, false, false, 0);
-        }
-        else if (field_centric) {
+        if (field_centric) {
             drivetrain.move(rotY, rotX, rx, (heading_delta * 0.001), denominator);
         }
         else {
@@ -190,8 +176,6 @@ public class DriveControl extends ControlModule {
 //        telemetry.addData("Angular Velocity: ", drivetrain.getAngularVelocity());
 
         telemetry.addData("Field Centric",field_centric);
-        telemetry.addData("Smooth",smooth);
-
 
     }
     @Override

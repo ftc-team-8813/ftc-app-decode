@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.geometry.Pose2d;
-import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,8 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware.navigation.MotionProfile;
-import org.firstinspires.ftc.teamcode.hardware.navigation.Odometry;
+import org.firstinspires.ftc.teamcode.hardware.navigation.GoBildaPinpointDriver;
 import org.firstinspires.ftc.teamcode.hardware.navigation.PID;
 
 @Config
@@ -33,6 +33,10 @@ public class Drivetrain {
     private final DcMotorEx back_left;
     private final DcMotorEx back_right;
     private final BNO055IMU imu;
+    private final GoBildaPinpointDriver odometry;
+
+    private Telemetry telemetry;
+
     private boolean has_reached;
 
     public static double forward_kp = 0.061;
@@ -88,12 +92,42 @@ public class Drivetrain {
     private double heading_was;
     private double heading;
 
+    public Drivetrain(DcMotorEx front_left, DcMotorEx front_right, DcMotorEx back_left, DcMotorEx back_right, BNO055IMU imu, GoBildaPinpointDriver odometry) {
+        this.front_left = front_left;
+        this.front_right = front_right;
+        this.back_left = back_left;
+        this.back_right = back_right;
+        this.imu = imu;
+        this.odometry = odometry;
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        parameters.gyroRange = BNO055IMU.GyroRange.DPS2000;
+        imu.initialize(parameters);
+
+        front_right.setDirection(DcMotorSimple.Direction.REVERSE);
+        back_right.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        front_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        front_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        back_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        back_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        odometry.setOffsets(-84.0, -168.0);
+        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odometry.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        odometry.resetPosAndIMU();
+    }
+
     public Drivetrain(DcMotorEx front_left, DcMotorEx front_right, DcMotorEx back_left, DcMotorEx back_right, BNO055IMU imu) {
         this.front_left = front_left;
         this.front_right = front_right;
         this.back_left = back_left;
         this.back_right = back_right;
         this.imu = imu;
+        odometry = null;
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -149,7 +183,7 @@ public class Drivetrain {
         return has_reached;
     }
 
-    public void autoMove(double forward, double strafe, double turn, double forward_error_band, double strafe_error_band, double turn_error_band, Pose2d odo, Telemetry telemetry) {
+    public void autoMove(double forward, double strafe, double turn, double forward_error_band, double strafe_error_band, double turn_error_band) {
 
         double heading = getHeading();
 
@@ -162,8 +196,8 @@ public class Drivetrain {
         this.strafe_error_band = strafe_error_band;
         this.turn_error_band = turn_error_band;
 
-        y = odo.getX();
-        x = odo.getY();
+        y = odometry.getPosY();
+        x = odometry.getPosX();
         rot = 0.0;
 
         if(Math.signum(-heading) == -1) {
@@ -193,8 +227,10 @@ public class Drivetrain {
 
     }
 
-    public void update(Pose2d odo, Telemetry telemetry, boolean motionProfile, int id) {
+    public void update(Telemetry telemetry) {
         double heading = getHeading();
+
+        odometry.update();
 
         heading_delta = heading - heading_was;
         turn_error = Math.abs(turn - rot);
@@ -206,12 +242,13 @@ public class Drivetrain {
         if (heading_delta > 300) {
             heading_delta -= 360;
         }
+
         if (heading_delta < -300) {
             heading_delta += 360;
         }
 
-        y = odo.getX();
-        x = odo.getY();
+        y = odometry.getPosY();
+        x = odometry.getPosX();
         rot = 0.0;
 
         if(Math.signum(-heading) == -1) {
@@ -227,19 +264,6 @@ public class Drivetrain {
             rot -= 360;
         }
 
-        if (motionProfile) {
-//            turn_pid.setKp(cs_turn_kp);
-//            turn_pid.setKi(cs_turn_ki);
-//            strafe_pid.setKp(cs_strafe_kp);
-            feed_forward = 0;
-        }
-        else {
-//            turn_pid.setKp(turn_kp);
-//            turn_pid.setKi(turn_ki);
-//            strafe_pid.setKp(strafe_kp);
-            feed_forward = 0;
-        }
-
         forward_power = forward_pid.getOutPut(forward,y,feed_forward);
         strafe_power = strafe_pid.getOutPut(strafe,x,feed_forward);
         turn_power = Range.clip((turn_pid.getOutPut(turn, rot, feed_forward)),-turn_clip,turn_clip);
@@ -248,18 +272,6 @@ public class Drivetrain {
 
         rotX = /*0.4 **/ (strafe_power * Math.cos(botHeading) - forward_power * Math.sin(botHeading));
         rotY = /*0.4 **/ (strafe_power * Math.sin(botHeading) + forward_power * Math.cos(botHeading));
-
-//        if (motionProfile) {
-//
-//            strafe_cs.updateMotionProfile(id,rise,fall);
-//            strafe_error = Math.abs(strafe - x);
-//
-//            rotY = strafe_cs.getProfiledPower(strafe_error, rotY,0) * (12.4/voltage);
-//
-////            rotY = Range.clip((strafe_power * Math.sin(botHeading) + forward_power * Math.cos(botHeading)),-0.2,0.4);
-//
-//        }
-
 
         denominator = Math.max(Math.abs(forward_power) + Math.abs(strafe_power) + Math.abs(turn_power), 1);
 
@@ -301,5 +313,13 @@ public class Drivetrain {
 
     public void updateHeading() {
         heading = imu.getAngularOrientation().firstAngle;
+    }
+
+    public GoBildaPinpointDriver getOdometry() {
+        return odometry;
+    }
+
+    public MecanumDrive getMecanumDrive() {
+        return new MecanumDrive((Motor) front_left, (Motor) front_right, (Motor) back_left, (Motor) back_right);
     }
 }
