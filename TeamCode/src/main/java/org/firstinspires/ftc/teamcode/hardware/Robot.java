@@ -62,7 +62,7 @@ public class Robot {
         this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right, imu_sensor);
         this.deposit = new Deposit(deposit_claw, deposit_rotator_left, deposit_rotator_right);
         this.lift = new Lift(lift_left, lift_right);
-
+        
 //        this.intake = new Intake(intake_spinner, left_arm, right_arm, intake_rotator);
 
     }
