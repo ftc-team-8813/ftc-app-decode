@@ -29,4 +29,8 @@ public class Deposit {
         return deposit_claw.getPosition();
     }
 
+    public double getDepositPosition() {
+        return deposit_rotator_right.getPosition();
+    }
+
 }
