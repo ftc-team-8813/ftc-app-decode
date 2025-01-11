@@ -4,11 +4,13 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -32,7 +34,7 @@ public class Drivetrain {
     private final DcMotorEx front_right;
     private final DcMotorEx back_left;
     private final DcMotorEx back_right;
-    private final BNO055IMU imu;
+//    private final BNO055IMU imu;
     private final GoBildaPinpointDriver odometry;
 
     private Telemetry telemetry;
@@ -92,20 +94,20 @@ public class Drivetrain {
     private double heading_was;
     private double heading;
 
-    public Drivetrain(DcMotorEx front_left, DcMotorEx front_right, DcMotorEx back_left, DcMotorEx back_right, BNO055IMU imu, GoBildaPinpointDriver odometry) {
+    public Drivetrain(DcMotorEx front_left, DcMotorEx front_right, DcMotorEx back_left, DcMotorEx back_right, GoBildaPinpointDriver odometry) {
         this.front_left = front_left;
         this.front_right = front_right;
         this.back_left = back_left;
         this.back_right = back_right;
-        this.imu = imu;
+//        this.imu = imu;
         this.odometry = odometry;
-
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        parameters.gyroRange = BNO055IMU.GyroRange.DPS2000;
-        imu.initialize(parameters);
+//
+//        BHI260IMU.Parameters parameters = new BHI260IMU.Parameters();
+//        parameters.angleUnit = IMU.AngleUnit.DEGREES;
+//        parameters.accelUnit = BHI260IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+//        parameters.gyroRange = BHI260IMU.GyroRange.DPS2000;
+//        imu.initialize(parameters);
 
         front_right.setDirection(DcMotorSimple.Direction.REVERSE);
         back_right.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -121,20 +123,20 @@ public class Drivetrain {
         odometry.resetPosAndIMU();
     }
 
-    public Drivetrain(DcMotorEx front_left, DcMotorEx front_right, DcMotorEx back_left, DcMotorEx back_right, BNO055IMU imu) {
+    public Drivetrain(DcMotorEx front_left, DcMotorEx front_right, DcMotorEx back_left, DcMotorEx back_right) {
         this.front_left = front_left;
         this.front_right = front_right;
         this.back_left = back_left;
         this.back_right = back_right;
-        this.imu = imu;
+//        this.imu = imu;
         odometry = null;
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        parameters.gyroRange = BNO055IMU.GyroRange.DPS2000;
-        imu.initialize(parameters);
+//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+//        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+//        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+//        parameters.gyroRange = BNO055IMU.GyroRange.DPS2000;
+//        imu.initialize(parameters);
 
         front_right.setDirection(DcMotorSimple.Direction.REVERSE);
         back_right.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -312,7 +314,7 @@ public class Drivetrain {
     }
 
     public void updateHeading() {
-        heading = imu.getAngularOrientation().firstAngle;
+//        heading = imu.getAngularOrientation().firstAngle;
     }
 
     public GoBildaPinpointDriver getOdometry() {

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -10,12 +11,19 @@ import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.navigation.PID;
 import org.firstinspires.ftc.teamcode.input.ControllerMap;
 
+@Config
 public class LiftControl extends ControlModule {
 
     private Lift lift;
     private Deposit deposit;
 
-    private final PID lift_PID = new PID(0.02, 0, 0, 0.03, 0, 0);
+    public static double kp = 0.03;
+    public static double ki = 0;
+    public static double kd = 0;
+    public static double kf = 0.035;
+    public static double maxIntegralSum = 0;
+
+    private final PID lift_PID = new PID(kp, ki, kd, kf, maxIntegralSum, 0);
 
     private final ElapsedTime lift_trapezoid = new ElapsedTime();;
 
@@ -58,7 +66,7 @@ public class LiftControl extends ControlModule {
         a_button = controllerMap.getButtonMap("lift:down", "gamepad1","a");
         b_button = controllerMap.getButtonMap("lift:wall", "gamepad1","b");
         y_button = controllerMap.getButtonMap("lift:chamber", "gamepad1","y");
-        y_button = controllerMap.getButtonMap("deposit:claw", "gamepad1","x");
+        x_button = controllerMap.getButtonMap("deposit:claw", "gamepad1","x");
 
         dpad_up = controllerMap.getButtonMap("deposit:up", "gamepad1","dpad_up");
         dpad_left = controllerMap.getButtonMap("deposit:normal", "gamepad1","dpad_left");
@@ -110,12 +118,14 @@ public class LiftControl extends ControlModule {
 //        if (dpad_down.edge() == -1) {
 //            deposit.setClawPosition(deposit_down);
 //        }
-        if (Math.abs(ax_right_y.get()) > 0.05) {
+        if (Math.abs(ax_right_y.get()) > 0.1) {
             double deposit_fine_adjust = deposit.getClawPosition() - ax_right_y.get() * 0.001; //TODO Rithwick may need to change the constant it depends on if you need faster or slower for deposit rotation fine adjust
             deposit.setClawPosition(deposit_fine_adjust);
         }
 
-        lift_target = -ax_left_y.get(); // TODO Rithwick start the program and use to get the lift_positions
+        if (Math.abs(ax_left_y.get()) >= 0.1) {
+            lift_target += -ax_left_y.get();
+        }// TODO Rithwick start the program and use to get the lift_positions
         //TODO Rithwick if needed to move faster or slower for fine adjust multiply this by a constant
 
         lift_power = Range.clip((lift_PID.getOutPut(lift_target, lift.getCurrentPosition(), 1) * Math.min(lift_trapezoid.seconds() * lift_accel, 1)), -lift_clip, lift_clip);

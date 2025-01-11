@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -50,16 +51,16 @@ public class Robot {
 //        DcMotorEx arm = hardwareMap.get(DcMotorEx.class, "arm");
 
         // Servos
-        Servo deposit_claw = hardwareMap.get(Servo.class, "deposit claw");
-        Servo deposit_rotator_left = hardwareMap.get(Servo.class, "deposit rotator left");
-        Servo deposit_rotator_right = hardwareMap.get(Servo.class, "deposit rotator right");
+        Servo deposit_claw = hardwareMap.get(Servo.class, "claw");
+        Servo deposit_rotator_left = hardwareMap.get(Servo.class, "leftDepo");
+        Servo deposit_rotator_right = hardwareMap.get(Servo.class, "rightDepo");
 
         // Sensors
-        BNO055IMU imu_sensor = hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU imu_sensor = null/*hardwareMap.get(BHI260IMU.class, "imu")*/;
 //        GoBildaPinpointDriver odometry = hardwareMap.get(GoBildaPinpointDriver.class,"odo");
 
         // Sub-Assemblies
-        this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right, imu_sensor);
+        this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right);
         this.deposit = new Deposit(deposit_claw, deposit_rotator_left, deposit_rotator_right);
         this.lift = new Lift(lift_left, lift_right);
         
