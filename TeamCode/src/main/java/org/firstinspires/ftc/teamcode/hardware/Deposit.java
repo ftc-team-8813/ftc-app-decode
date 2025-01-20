@@ -15,10 +15,12 @@ public class Deposit {
         this.deposit_rotator_left = deposit_rotator_left;
         this.deposit_rotator_right = deposit_rotator_right;
 //        this.deposit_sensor = deposit_sensor;
+        deposit_rotator_left.setDirection(Servo.Direction.REVERSE);
     }
 
     public void setRotatorPosition(double pos) {
         deposit_rotator_right.setPosition(pos);
+        deposit_rotator_left.setPosition(pos);
     }
 
     public void setClawPosition(double pos) {
