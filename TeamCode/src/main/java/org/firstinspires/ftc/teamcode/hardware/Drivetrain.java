@@ -41,24 +41,27 @@ public class Drivetrain {
 
     private boolean has_reached;
 
-    public static double forward_kp = 0.061;
-    public static double forward_ki = 0.0225;
-    public static double forward_kd = 0.010;
+    public static double forward_kp = 0.0062;
+    public static double forward_ki = 0.003; //0.02
+    public static double forward_kd = 0.001; //0.0004
     public static double forward_a = 0.8;
-    public static double strafe_kp = 0.071;
-    public static double strafe_ki = 0.0225;
-    public static double strafe_kd = 0.019;
-    public static double strafe_a = 0.8;
-    public static double turn_kp = 0.0075;
-    public static double turn_ki = 0.125;
-    public static double turn_kd = 0.0028;
-    public static double turn_a = 0.8;
+    public static double strafe_kp = 0.001;
+    public static double strafe_ki = 0;
+    public static double strafe_kd = 0;
+    public static double strafe_a = 0;
+    public static double turn_kp = 0.0001;
+    public static double turn_ki = 0;
+    public static double turn_kd = 0;
+    public static double turn_a = 0;
     public static double turn_max_i_sum = 1;
     public static double turn_clip = 1;
+    public static double fwd_kf = 0;
+    public static double stf_kf = 0;
+    public static double trn_kf = 0;
 
-    private final PID forward_pid = new PID(forward_kp,forward_ki,forward_kd,0.2,1,forward_a);
-    private final PID strafe_pid = new PID(strafe_kp,strafe_ki,strafe_kd,0.2,1,strafe_a);
-    private final PID turn_pid = new PID(turn_kp,turn_ki,turn_kd,0.2,turn_max_i_sum,turn_a);
+    private final PID forward_pid = new PID(forward_kp,forward_ki,forward_kd,fwd_kf,1,forward_a);
+    private final PID strafe_pid = new PID(strafe_kp,strafe_ki,strafe_kd,stf_kf,1,strafe_a);
+    private final PID turn_pid = new PID(turn_kp,turn_ki,turn_kd,trn_kf,turn_max_i_sum,turn_a);
 
     public static double rise_slope = 0.1;
     public static double fall_slope = 0.00000000000000000000001;
@@ -109,16 +112,16 @@ public class Drivetrain {
 //        parameters.gyroRange = BHI260IMU.GyroRange.DPS2000;
 //        imu.initialize(parameters);
 
-        front_right.setDirection(DcMotorSimple.Direction.REVERSE);
-        back_right.setDirection(DcMotorSimple.Direction.REVERSE);
+        front_left.setDirection(DcMotorSimple.Direction.REVERSE);
+        back_left.setDirection(DcMotorSimple.Direction.REVERSE);
 
         front_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         front_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         back_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         back_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        odometry.setOffsets(-84.0, -168.0);
-        odometry.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        odometry.setOffsets(-7.5, 135);
+        odometry.setEncoderResolution(8192/(35*Math.PI));
         odometry.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         odometry.resetPosAndIMU();
     }
@@ -200,7 +203,7 @@ public class Drivetrain {
 
         y = odometry.getPosY();
         x = odometry.getPosX();
-        rot = 0.0;
+        rot = Math.toDegrees(odometry.getHeading());
 
         if(Math.signum(-heading) == -1) {
             rot = ((-heading) + 360);
@@ -215,17 +218,17 @@ public class Drivetrain {
             rot -= 360;
         }
 
-        forward_error = Math.abs(forward - y);
-        strafe_error = Math.abs(strafe - x);
+        forward_error = Math.abs(forward - x);
+        strafe_error = Math.abs(strafe - y);
         turn_error = Math.abs(turn - rot);
 
         if((forward_error <= forward_error_band) && (strafe_error <= strafe_error_band) && (turn_error <= turn_error_band)){
             has_reached = true;
         }
 
-        telemetry.addData("F Error",forward_error);
-        telemetry.addData("S Error",strafe_error);
-        telemetry.addData("T Error",turn_error);
+//        telemetry.addData("F Error",forward_error);
+//        telemetry.addData("S Error",strafe_error);
+//        telemetry.addData("T Error",turn_error);
 
     }
 
@@ -251,7 +254,7 @@ public class Drivetrain {
 
         y = odometry.getPosY();
         x = odometry.getPosX();
-        rot = 0.0;
+        rot = Math.toDegrees(odometry.getHeading());
 
         if(Math.signum(-heading) == -1) {
             rot = ((-heading) + 360);
@@ -266,8 +269,8 @@ public class Drivetrain {
             rot -= 360;
         }
 
-        forward_power = forward_pid.getOutPut(forward,y,feed_forward);
-        strafe_power = strafe_pid.getOutPut(strafe,x,feed_forward);
+        forward_power = forward_pid.getOutPut(forward,x,feed_forward);
+        strafe_power = strafe_pid.getOutPut(strafe,y,feed_forward);
         turn_power = Range.clip((turn_pid.getOutPut(turn, rot, feed_forward)),-turn_clip,turn_clip);
 
         botHeading = -1* Math.toRadians(heading);
@@ -285,12 +288,15 @@ public class Drivetrain {
 
         heading_was = heading;
 //
-//        telemetry.addData("F Power",forward_power);
-//        telemetry.addData("S Power",strafe_power);
-//        telemetry.addData("T Power",turn_power);
-//        telemetry.addData("F Current",y);
-//        telemetry.addData("S Current",x);
-//        telemetry.addData("T Current",rot);
+        telemetry.addData("F Power",forward_power);
+        telemetry.addData("S Power",strafe_power);
+        telemetry.addData("T Power",turn_power);
+        telemetry.addData("F Current",x);
+        telemetry.addData("S Current",y);
+        telemetry.addData("T Current",rot);
+        telemetry.addData("F Target",forward);
+        telemetry.addData("S Target",strafe);
+        telemetry.addData("T Target",turn);
 //        telemetry.addData("Forward kP",forward_kp);
 //        telemetry.addData("Strafe kP",strafe_kp);
 //        telemetry.addData("Turn kP",turn_kp);
@@ -310,7 +316,7 @@ public class Drivetrain {
 //    }
 
     public double getHeading() {
-        return heading;
+        return Math.toDegrees(odometry.getHeading());
     }
 
     public void updateHeading() {

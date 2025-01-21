@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.util.Logger;
 import org.firstinspires.ftc.teamcode.util.LoopTimer;
 
-@Autonomous(name="!! Right Auto !!")
-public class RightAuto extends LoggingOpMode {
+@Autonomous(name="!! Left Auto !!")
+public class LeftAuto extends LoggingOpMode {
 
     private Drivetrain drivetrain;
 
@@ -18,7 +18,7 @@ public class RightAuto extends LoggingOpMode {
 
     private FtcDashboard dashboard;
 
-    private final Logger log = new Logger("Right Auto");
+    private final Logger log = new Logger("Left Auto");
 
 
     @Override
@@ -41,7 +41,7 @@ public class RightAuto extends LoggingOpMode {
 
         switch (main_id) {
             case 0:
-                drivetrain.autoMove(300,0,0,3,3,3);
+                drivetrain.autoMove(-1200,0,0,3,3,3);
                 if (drivetrain.hasReached()) {
 //                    main_id += 1;
                 }

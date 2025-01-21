@@ -57,10 +57,10 @@ public class Robot {
 
         // Sensors
         BNO055IMU imu_sensor = null/*hardwareMap.get(BHI260IMU.class, "imu")*/;
-//        GoBildaPinpointDriver odometry = hardwareMap.get(GoBildaPinpointDriver.class,"odo");
+        GoBildaPinpointDriver odometry = hardwareMap.get(GoBildaPinpointDriver.class,"odo");
 
         // Sub-Assemblies
-        this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right);
+        this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right, odometry);
         this.deposit = new Deposit(deposit_claw, deposit_rotator_left, deposit_rotator_right);
         this.lift = new Lift(lift_left, lift_right);
         

@@ -132,9 +132,9 @@ public class DriveControl extends ControlModule {
 
         double slow = 1 - (ax_slow.get() / 3);
 
-        double y = ax_drive_left_y.get() * forward_speed * slow;
-        double x = -ax_drive_left_x.get() * strafe_speed * slow;
-        double rx = -ax_drive_right_x.get() * turn_speed * slow;
+        double y = -ax_drive_left_y.get() * forward_speed * slow;
+        double x = ax_drive_left_x.get() * strafe_speed * slow;
+        double rx = ax_drive_right_x.get() * turn_speed * slow;
 
         //this makes turning slower as lateral motion gets faster
         rx *= (1 - (Math.sqrt(Math.pow(ax_drive_left_y.get(), 2) + Math.pow(ax_drive_left_x.get() * 0.8, 2)) * speed_dependent_steering)); //pythagorean theorem
