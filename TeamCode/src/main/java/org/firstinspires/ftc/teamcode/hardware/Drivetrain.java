@@ -45,14 +45,14 @@ public class Drivetrain {
     public static double forward_ki = 0.003; //0.02
     public static double forward_kd = 0.001; //0.0004
     public static double forward_a = 0.8;
-    public static double strafe_kp = 0.001;
-    public static double strafe_ki = 0;
-    public static double strafe_kd = 0;
-    public static double strafe_a = 0;
-    public static double turn_kp = 0.0001;
-    public static double turn_ki = 0;
-    public static double turn_kd = 0;
-    public static double turn_a = 0;
+    public static double strafe_kp = 0.0074;
+    public static double strafe_ki = 0.003;
+    public static double strafe_kd = 0.0008;
+    public static double strafe_a = 0.8;
+    public static double turn_kp = 0.03;
+    public static double turn_ki = 0.06;
+    public static double turn_kd = 0.003;
+    public static double turn_a = 0.8;
     public static double turn_max_i_sum = 1;
     public static double turn_clip = 1;
     public static double fwd_kf = 0;
@@ -201,7 +201,7 @@ public class Drivetrain {
         this.strafe_error_band = strafe_error_band;
         this.turn_error_band = turn_error_band;
 
-        y = odometry.getPosY();
+        y = -odometry.getPosY();
         x = odometry.getPosX();
         rot = Math.toDegrees(odometry.getHeading());
 
@@ -252,7 +252,7 @@ public class Drivetrain {
             heading_delta += 360;
         }
 
-        y = odometry.getPosY();
+        y = -odometry.getPosY();
         x = odometry.getPosX();
         rot = Math.toDegrees(odometry.getHeading());
 

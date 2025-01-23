@@ -2,10 +2,16 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.hardware.Deposit;
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain;
+import org.firstinspires.ftc.teamcode.hardware.Lift;
 import org.firstinspires.ftc.teamcode.hardware.Robot;
+import org.firstinspires.ftc.teamcode.hardware.navigation.PID;
 import org.firstinspires.ftc.teamcode.util.Logger;
 import org.firstinspires.ftc.teamcode.util.LoopTimer;
 
@@ -13,10 +19,39 @@ import org.firstinspires.ftc.teamcode.util.LoopTimer;
 public class RightAuto extends LoggingOpMode {
 
     private Drivetrain drivetrain;
+    private Lift lift;
+    private Deposit deposit;
 
     private int main_id = 0;
 
     private FtcDashboard dashboard;
+
+    public static double kp = 0.03;
+    public static double ki = 0;
+    public static double kd = 0;
+    public static double kf = 0.0125;
+    public static double maxIntegralSum = 0;
+
+
+    private final PID lift_PID = new PID(kp, ki, kd, kf, maxIntegralSum, 0);
+
+    private final ElapsedTime deposit_timer = new ElapsedTime();
+
+    private final ElapsedTime lift_trapezoid = new ElapsedTime();
+    private final double lift_accel = 0.1;
+    private double lift_target = 0;
+    private double lift_power;
+    private double lift_clip = 0.8;
+
+    private final double lift_high_chamber = 2044;
+    private final double lift_low_chamber = 328;
+    private final double lift_down = 0;
+    private final double deposit_up = 0.4;
+    private final double deposit_normal = 0.59;
+    private final double deposit_down = 0.7;
+    private final double deposit_claw_closed = 0.665;
+    private final double deposit_claw_open = 1;
+
 
     private final Logger log = new Logger("Right Auto");
 
@@ -27,11 +62,22 @@ public class RightAuto extends LoggingOpMode {
 
         Robot robot = Robot.initialize(hardwareMap);
         drivetrain = robot.drivetrain;
+        deposit = robot.deposit;
+        lift = robot.lift;
+
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         dashboard = FtcDashboard.getInstance();
 
         drivetrain.resetEncoders();
+        deposit.setClawPosition(deposit_claw_closed);
+        deposit.setRotatorPosition(deposit_normal);
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        lift_target = lift_high_chamber;
     }
 
     @Override
@@ -41,27 +87,43 @@ public class RightAuto extends LoggingOpMode {
 
         switch (main_id) {
             case 0:
-                drivetrain.autoMove(300,0,0,3,3,3);
+                drivetrain.autoMove(680,-370,0,10,10,2);
                 if (drivetrain.hasReached()) {
-//                    main_id += 1;
+                    main_id += 1;
                 }
                 break;
-//            case 1:
-//                drivetrain.autoMove(300,300,0,3,3,3);
-//                if (drivetrain.hasReached()) {
-//                    main_id += 1;
-//                }
-//                break;
-//            case 2:
-//                drivetrain.autoMove(300,300,90,3,3,3);
-//                if (drivetrain.hasReached()) {
-//                    main_id += 1;
-//                }
-//                break;
+            case 1:
+                deposit.setRotatorPosition(deposit_down);
+                lift_target = 1200;
+                deposit_timer.reset();
+                main_id += 1;
+                break;
+            case 2:
+                if (deposit_timer.seconds() > 0.9) {
+                    lift_target = lift_down;
+                    deposit.setClawPosition(deposit_claw_open);
+                }
+                if (deposit_timer.seconds() > 0.75) {
+                    main_id += 1;
+                }
+                break;
+            case 3:
+                drivetrain.autoMove(0,0,0,10,10,2);
+                if (drivetrain.hasReached()) {
+                    main_id += 1;
+                }
+                break;
         }
+
+        lift_power = Range.clip((lift_PID.getOutPut(lift_target, lift.getCurrentPosition(), 1) * Math.min(lift_trapezoid.seconds() * lift_accel, 1)), -0.6, lift_clip);
+        lift.setPower(lift_power);
 
         drivetrain.update(telemetry);
 
+        telemetry.addData("Lift Target", lift_target);
+        telemetry.addData("Lift Power", lift_power);
+        telemetry.addData("Lift Current", lift.getCurrentPosition());
+        telemetry.addData("Lift Position", lift.getCurrentPosition());
         telemetry.addData("Loop Time: ", LoopTimer.getLoopTime());
         telemetry.update();
 
