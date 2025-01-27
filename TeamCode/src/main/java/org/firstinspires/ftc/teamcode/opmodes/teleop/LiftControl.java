@@ -37,8 +37,8 @@ public class LiftControl extends ControlModule {
     private double lift_power;
     private double lift_clip = 0.8;
 
-    private int score_sequence = 0;
-    private int specimen_pickup_sequence = 0;
+    private int score_sequence = -1;
+    private int specimen_pickup_sequence = -1;
 
     private boolean is_deposit_claw_closed = false;
 
@@ -51,7 +51,7 @@ public class LiftControl extends ControlModule {
     private ControllerMap.AxisEntry ax_left_y;
     private ControllerMap.AxisEntry ax_right_y;
 
-    private final double lift_high_chamber_position = 2044;
+    private final double lift_high_chamber_position = 1849;
     private final double lift_low_chamber_position  = 328;
     private final double lift_ground_position = 8;
     private final double deposit_rotator_ground_positon = 0.57;
@@ -114,7 +114,7 @@ public class LiftControl extends ControlModule {
             lift_trapezoid_timer.reset();
         }
 
-        if (high_chamber_button.edge() == -1) {
+        if (ground_button.edge() == -1) {
             lift_target = lift_ground_position;
             lift_trapezoid_timer.reset();
         }
@@ -144,7 +144,13 @@ public class LiftControl extends ControlModule {
                 break;
             case 1:
                 if (specimen_pickup_timer.seconds() > 0.5) {
-                    deposit.setRotatorPosition(0.4);
+                    deposit.setRotatorPosition(deposit_specimen_pickup_position);
+                    specimen_pickup_sequence += 1;
+                }
+                break;
+            case 2:
+                if (specimen_pickup_timer.seconds() > 2) {
+                    deposit.setRotatorPosition(deposit_rotator_ground_positon);
                     specimen_pickup_sequence += 1;
                 }
                 break;

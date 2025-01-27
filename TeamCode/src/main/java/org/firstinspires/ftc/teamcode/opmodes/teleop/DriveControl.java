@@ -84,6 +84,7 @@ public class DriveControl extends ControlModule {
 
         guide = controllerMap.getButtonMap("drive:guide", "gamepad1","guide");
 
+        drivetrain.resetEncoders();
     }
 
     @Override
@@ -93,7 +94,7 @@ public class DriveControl extends ControlModule {
     @Override
     public void update(Telemetry telemetry) {
 
-        drivetrain.updateHeading();
+        drivetrain.updateOdometry();
 
         double heading = drivetrain.getHeading();
 
@@ -150,12 +151,12 @@ public class DriveControl extends ControlModule {
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
 
         if (field_centric) {
-            drivetrain.move(rotY, rotX, rx, (heading_delta * 0.001), denominator);
+            drivetrain.move(rotY, rotX, rx, (heading_delta * 0.01), denominator);
         }
         else {
             //drivetrain.move(Math.pow(Math.abs(y), 1.6) * Math.signum(y),Math.pow(Math.abs(x), 1.6) * Math.signum(x),Math.pow(Math.abs(rx), 1.6) * Math.signum(rx) * 0.6,(heading_delta * 0.001));
             //drivetrain.move(Math.pow(Math.abs(y), 1.6) * Math.signum(y),Math.pow(Math.abs(x), 1.6) * Math.signum(x), ((target_heading - heading_unwrapped) * heading_p) + rx, 0);
-            drivetrain.move(y, x, rx, (heading_delta * 0.001));
+            drivetrain.move(y, x, rx, (heading_delta * 0.01));
             //Math.pow(Math.abs(rx), 1.6) * Math.signum(rx) * 0.6
 
         }
@@ -173,6 +174,7 @@ public class DriveControl extends ControlModule {
         telemetry.addData("denominator", denominator);
 
         telemetry.addData("Heading: ", heading);
+        telemetry.addData("Heading Delta", heading_delta);
 //        telemetry.addData("Angular Velocity: ", drivetrain.getAngularVelocity());
 
         telemetry.addData("Field Centric",field_centric);

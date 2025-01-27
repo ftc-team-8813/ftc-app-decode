@@ -41,15 +41,15 @@ public class Drivetrain {
 
     private boolean has_reached;
 
-    public static double forward_kp = 0.0062;
+    public static double forward_kp = 0.0058;
     public static double forward_ki = 0.003; //0.02
     public static double forward_kd = 0.001; //0.0004
     public static double forward_a = 0.8;
-    public static double strafe_kp = 0.0074;
-    public static double strafe_ki = 0.003;
-    public static double strafe_kd = 0.0008;
+    public static double strafe_kp = 0.0093;
+    public static double strafe_ki = 0.004;
+    public static double strafe_kd = 0.00065;
     public static double strafe_a = 0.8;
-    public static double turn_kp = 0.03;
+    public static double turn_kp = 0.033;
     public static double turn_ki = 0.06;
     public static double turn_kd = 0.003;
     public static double turn_a = 0.8;
@@ -321,6 +321,10 @@ public class Drivetrain {
 
     public void updateHeading() {
 //        heading = imu.getAngularOrientation().firstAngle;
+    }
+
+    public void updateOdometry() {
+        odometry.update();
     }
 
     public GoBildaPinpointDriver getOdometry() {

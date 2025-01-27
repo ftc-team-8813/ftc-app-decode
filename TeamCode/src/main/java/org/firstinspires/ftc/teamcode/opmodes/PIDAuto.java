@@ -43,19 +43,7 @@ public class PIDAuto extends LoggingOpMode {
             case 0:
                 drivetrain.autoMove(0,300,0,10,10,3);
                 if (drivetrain.hasReached()) {
-                    main_id += 1;
-                }
-                break;
-            case 1:
-                drivetrain.autoMove(300,300,0,10,10,3);
-                if (drivetrain.hasReached()) {
-                    main_id += 1;
-                }
-                break;
-            case 2:
-                drivetrain.autoMove(300,300,90,10,10,3);
-                if (drivetrain.hasReached()) {
-                    main_id += 1;
+//                    main_id += 1;
                 }
                 break;
         }

@@ -32,10 +32,11 @@ public class RightAuto extends LoggingOpMode {
     public static double kf = 0.0125;
     public static double maxIntegralSum = 0;
 
-
     private final PID lift_PID = new PID(kp, ki, kd, kf, maxIntegralSum, 0);
 
     private final ElapsedTime deposit_timer = new ElapsedTime();
+    private final ElapsedTime specimen_pickup_timer = new ElapsedTime();
+    private final ElapsedTime timer = new ElapsedTime();
 
     private final ElapsedTime lift_trapezoid = new ElapsedTime();
     private final double lift_accel = 0.1;
@@ -43,7 +44,7 @@ public class RightAuto extends LoggingOpMode {
     private double lift_power;
     private double lift_clip = 0.8;
 
-    private final double lift_high_chamber = 2044;
+    private final double lift_high_chamber = 1849;
     private final double lift_low_chamber = 328;
     private final double lift_down = 0;
     private final double deposit_up = 0.4;
@@ -78,6 +79,7 @@ public class RightAuto extends LoggingOpMode {
     public void start() {
         super.start();
         lift_target = lift_high_chamber;
+        timer.reset();
     }
 
     @Override
@@ -87,9 +89,11 @@ public class RightAuto extends LoggingOpMode {
 
         switch (main_id) {
             case 0:
-                drivetrain.autoMove(680,-370,0,10,10,2);
-                if (drivetrain.hasReached()) {
-                    main_id += 1;
+                if (timer.seconds() > 1.5) {
+                    drivetrain.autoMove(675, -120, 0, 10, 10, 2);
+                    if (drivetrain.hasReached()) {
+                        main_id += 1;
+                    }
                 }
                 break;
             case 1:
@@ -103,12 +107,66 @@ public class RightAuto extends LoggingOpMode {
                     lift_target = lift_down;
                     deposit.setClawPosition(deposit_claw_open);
                 }
-                if (deposit_timer.seconds() > 0.75) {
+                if (deposit_timer.seconds() > 1.5) {
                     main_id += 1;
                 }
                 break;
             case 3:
-                drivetrain.autoMove(0,0,0,10,10,2);
+                drivetrain.autoMove(300,800,180,10,10,2);
+                if (drivetrain.hasReached()) {
+                    deposit.setRotatorPosition(deposit_normal);
+                    timer.reset();
+                    main_id += 1;
+                }
+                break;
+            case 4:
+                drivetrain.autoMove(90,800,180,10,10,2);
+                if (drivetrain.hasReached() && timer.seconds() > 2.5) {
+                    deposit.setClawPosition(deposit_claw_closed);
+                    specimen_pickup_timer.reset();
+                    main_id += 1;
+                }
+                break;
+            case 5:
+                if (specimen_pickup_timer.seconds() > 0.5) {
+                    deposit.setRotatorPosition(deposit_up);
+                    main_id += 1;
+                }
+                break;
+            case 6:
+                drivetrain.autoMove(300,-260,0,10,10,2);
+                if (drivetrain.hasReached()) {
+                    main_id += 1;
+                    deposit.setRotatorPosition(deposit_normal);
+                    lift_target = lift_high_chamber;
+                    timer.reset();
+                }
+                break;
+            case 7:
+                if (timer.seconds() > 1.5) {
+                    drivetrain.autoMove(675, -260, 0, 10, 10, 2);
+                    if (drivetrain.hasReached()) {
+                        main_id += 1;
+                    }
+                }
+                break;
+            case 8:
+                deposit.setRotatorPosition(deposit_down);
+                lift_target = 1200;
+                deposit_timer.reset();
+                main_id += 1;
+                break;
+            case 9:
+                if (deposit_timer.seconds() > 0.9) {
+                    lift_target = lift_down;
+                    deposit.setClawPosition(deposit_claw_open);
+                }
+                if (deposit_timer.seconds() > 1.5) {
+                    main_id += 1;
+                }
+                break;
+            case 10:
+                drivetrain.autoMove(100,800,0,10,10,2);
                 if (drivetrain.hasReached()) {
                     main_id += 1;
                 }
