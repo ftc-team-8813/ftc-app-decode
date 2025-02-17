@@ -17,6 +17,8 @@ public class Robot {
     public Drivetrain drivetrain;
     public Lift lift;
     public Deposit deposit;
+    public Arm arm;
+    public Intake intake;
     public IMU imu;
 
     public EventBus eventBus = new EventBus();
@@ -47,13 +49,17 @@ public class Robot {
         DcMotorEx back_right = hardwareMap.get(DcMotorEx.class, "back right");
         DcMotorEx lift_left = hardwareMap.get(DcMotorEx.class, "lift left");
         DcMotorEx lift_right = hardwareMap.get(DcMotorEx.class, "lift right");
-//        DcMotorEx horizontal = hardwareMap.get(DcMotorEx.class, "horizontal");
-//        DcMotorEx arm = hardwareMap.get(DcMotorEx.class, "arm");
+        DcMotorEx horizontal = hardwareMap.get(DcMotorEx.class, "horizontal");
 
         // Servos
         Servo deposit_claw = hardwareMap.get(Servo.class, "claw");
         Servo deposit_rotator_left = hardwareMap.get(Servo.class, "leftDepo");
         Servo deposit_rotator_right = hardwareMap.get(Servo.class, "rightDepo");
+        Servo arm_rotator = hardwareMap.get(Servo.class, "arm rotator");
+        Servo arm_lower = hardwareMap.get(Servo.class, "arm lower");
+        Servo arm_upper = hardwareMap.get(Servo.class, "arm upper");
+        Servo intake_rotator = hardwareMap.get(Servo.class, "intake rotator");
+        Servo intake_claw = hardwareMap.get(Servo.class, "intake claw");
 
         // Sensors
         BNO055IMU imu_sensor = null/*hardwareMap.get(BHI260IMU.class, "imu")*/;
@@ -63,8 +69,9 @@ public class Robot {
         this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right, odometry);
         this.deposit = new Deposit(deposit_claw, deposit_rotator_left, deposit_rotator_right);
         this.lift = new Lift(lift_left, lift_right);
-        
-//        this.intake = new Intake(intake_spinner, left_arm, right_arm, intake_rotator);
+
+        this.arm = new Arm(horizontal, arm_rotator, arm_lower, arm_upper);
+        this.intake = new Intake(intake_rotator, intake_claw);
 
     }
 }

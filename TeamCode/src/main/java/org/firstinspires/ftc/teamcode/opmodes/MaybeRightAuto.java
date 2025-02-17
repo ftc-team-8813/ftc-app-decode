@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -15,8 +14,8 @@ import org.firstinspires.ftc.teamcode.hardware.navigation.PID;
 import org.firstinspires.ftc.teamcode.util.Logger;
 import org.firstinspires.ftc.teamcode.util.LoopTimer;
 
-@Autonomous(name="!! Right Auto !!")
-public class RightAuto extends LoggingOpMode {
+@Autonomous(name="!! Maybe Right Auto !!")
+public class MaybeRightAuto extends LoggingOpMode {
 
     private Drivetrain drivetrain;
     private Lift lift;
@@ -66,12 +65,13 @@ public class RightAuto extends LoggingOpMode {
         deposit = robot.deposit;
         lift = robot.lift;
 
+
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         dashboard = FtcDashboard.getInstance();
 
         drivetrain.resetEncoders();
         deposit.setClawPosition(deposit_claw_closed);
-        deposit.setRotatorPosition(0.68);
+        deposit.setRotatorPosition(deposit_normal);
     }
 
     @Override
@@ -91,7 +91,6 @@ public class RightAuto extends LoggingOpMode {
                 if (timer.seconds() > 1.5) {
                     drivetrain.autoMove(670, -160, 0, 10, 10, 2);
                     if (drivetrain.hasReached()) {
-                        deposit.setRotatorPosition(deposit_normal);
                         main_id += 1;
                     }
                 }
@@ -112,21 +111,22 @@ public class RightAuto extends LoggingOpMode {
                 }
                 break;
             case 3:
-                drivetrain.autoMove(100,800,0,10,10,2); //
+                drivetrain.autoMove(400,790,0,10,10,2); //
                 if (drivetrain.hasReached()) {
-//                    main_id += 1;
+                    main_id += 1;
+                    timer.reset();
                 }
                 break;
             case 4:
-                drivetrain.autoMove(300,840,180,10,10,2);
-                if (drivetrain.hasReached()) {
+                drivetrain.autoMove(400,790,180,10,10,2);
+                if (drivetrain.hasReached() && timer.seconds() > 2) {
                     deposit.setRotatorPosition(deposit_normal);
                     timer.reset();
                     main_id += 1;
                 }
                 break;
             case 5:
-                drivetrain.autoMove(210,840,180,10,10,2);
+                drivetrain.autoMove(50,790,180,10,10,2);
                 if (drivetrain.hasReached() && timer.seconds() > 2.5) {
                     deposit.setClawPosition(deposit_claw_closed);
                     specimen_pickup_timer.reset();
@@ -140,7 +140,7 @@ public class RightAuto extends LoggingOpMode {
                 }
                 break;
             case 7:
-                drivetrain.autoMove(300,-260,180,10,10,2);
+                drivetrain.autoMove(400,-270,180,10,10,2);
                 if (drivetrain.hasReached()) {
                     main_id += 1;
                     deposit.setRotatorPosition(deposit_normal);
@@ -149,15 +149,15 @@ public class RightAuto extends LoggingOpMode {
                 }
                 break;
             case 8:
-                drivetrain.autoMove(300,-260,0,10,10,2);
+                drivetrain.autoMove(400,-270,0,10,10,2);
                 if (drivetrain.hasReached()) {
                     main_id += 1;
                 }
                 break;
             case 9:
                 if (timer.seconds() > 1.5) {
-                    drivetrain.autoMove(700, -260, 0, 10, 10, 2);
-                    if (drivetrain.hasReached()) {
+                    drivetrain.autoMove(670, -270, 0, 10, 10, 2);
+                    if (drivetrain.hasReached() && timer.seconds() > 2.5) {
                         main_id += 1;
                     }
                 }

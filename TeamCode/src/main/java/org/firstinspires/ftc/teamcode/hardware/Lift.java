@@ -26,6 +26,10 @@ public class Lift {
         lift_right.setPower(-pow);
     }
 
+    public double getPower() {
+        return lift_left.getPower();
+    }
+
     public double getCurrentPosition() {
         return lift_left.getCurrentPosition();
     }

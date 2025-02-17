@@ -45,7 +45,7 @@ public class Drivetrain {
     public static double forward_ki = 0.003; //0.02
     public static double forward_kd = 0.001; //0.0004
     public static double forward_a = 0.8;
-    public static double strafe_kp = 0.0093;
+    public static double strafe_kp = 0.01; //0.0095
     public static double strafe_ki = 0.004;
     public static double strafe_kd = 0.00065;
     public static double strafe_a = 0.8;
@@ -297,14 +297,17 @@ public class Drivetrain {
         telemetry.addData("F Target",forward);
         telemetry.addData("S Target",strafe);
         telemetry.addData("T Target",turn);
+        telemetry.addData("F Error",forward_error);
+        telemetry.addData("S Error",strafe_error);
+        telemetry.addData("T Error",turn_error);
 //        telemetry.addData("Forward kP",forward_kp);
 //        telemetry.addData("Strafe kP",strafe_kp);
 //        telemetry.addData("Turn kP",turn_kp);
 //        telemetry.addData("Turn Clip",turn_clip);
 //        telemetry.addData("Rotation",-odo.getRotation().getDegrees());
-//        telemetry.addData("RotY",rotY);
-//        telemetry.addData("RotX",rotX);hh
-//        telemetry.addData("Has Reached",has_reached);
+        telemetry.addData("RotY",rotY);
+        telemetry.addData("RotX",rotX);
+        telemetry.addData("Has Reached",has_reached);
     }
 
 //    public double getForwardPosition() {

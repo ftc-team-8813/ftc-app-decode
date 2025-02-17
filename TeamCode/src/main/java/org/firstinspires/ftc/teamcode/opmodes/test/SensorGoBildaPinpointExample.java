@@ -177,6 +177,8 @@ public class SensorGoBildaPinpointExample extends LinearOpMode {
             String velocity = String.format(Locale.US,"{XVel: %.3f, YVel: %.3f, HVel: %.3f}", vel.getX(DistanceUnit.MM), vel.getY(DistanceUnit.MM), vel.getHeading(AngleUnit.DEGREES));
             telemetry.addData("Velocity", velocity);
 
+            telemetry.addData("X Encoder",odo.getEncoderX());
+            telemetry.addData("Y Encoder",odo.getEncoderY());
 
             /*
             Gets the Pinpoint device status. Pinpoint can reflect a few states. But we'll primarily see
