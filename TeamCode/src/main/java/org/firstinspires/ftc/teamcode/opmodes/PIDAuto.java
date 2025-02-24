@@ -41,7 +41,7 @@ public class PIDAuto extends LoggingOpMode {
 
         switch (main_id) {
             case 0:
-                drivetrain.autoMove(400,0,0,10,10,3);
+                drivetrain.autoMove(0,0,45,10,10,3);
                 if (drivetrain.hasReached()) {
 //                    main_id += 1;
                 }

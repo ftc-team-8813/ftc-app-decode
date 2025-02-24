@@ -15,13 +15,7 @@ public class DriveControl extends ControlModule {
     private ControllerMap.AxisEntry ax_drive_left_x;
     private ControllerMap.AxisEntry ax_drive_left_y;
     private ControllerMap.AxisEntry ax_drive_right_x;
-    private ControllerMap.AxisEntry ax_horizontal_left_x;
     private ControllerMap.AxisEntry ax_slow;
-    private ControllerMap.ButtonEntry dpad_up;
-    private ControllerMap.ButtonEntry dpad_down;
-    private ControllerMap.ButtonEntry dpad_left;
-    private ControllerMap.ButtonEntry dpad_right;
-    private ControllerMap.ButtonEntry guide;
 
     private double forward_speed = 1;
     private double strafe_speed = 1.1;
@@ -39,26 +33,6 @@ public class DriveControl extends ControlModule {
 
     private double speed_dependent_steering = 0.5; //0 is no speed dependent steering, 1 is too much
 
-    //private double heading_p = 0.009;
-
-    private double forward;
-    private double strafe;
-    private double turn;
-
-    private boolean deg_0 = false;
-    private boolean deg_90 = false;
-    private boolean deg_180 = false;
-    private boolean deg_270 = false;
-
-    public static double turn_kp = 0.007;
-    public static double turn_ki = 0.125;
-    public static double turn_kd = 0.0028;
-    public static double turn_a = 0.8;
-    public static double turn_max_i_sum = 1;
-    public static double turn_clip = 1;
-
-    private final PID turn_pid = new PID(turn_kp,turn_ki,turn_kd,0.2,turn_max_i_sum,turn_a);
-
     private double ADJUSTHORIZ = 0;
     private double MAXEXTENDEDHORIZ = 1440;
 
@@ -71,18 +45,9 @@ public class DriveControl extends ControlModule {
         this.drivetrain = robot.drivetrain;
 
         ax_drive_left_x = controllerMap.getAxisMap("drive:left_x", "gamepad1", "left_stick_x");
-        ax_drive_left_y = controllerMap.getAxisMap("drive:right_y", "gamepad1", "left_stick_y");
+        ax_drive_left_y = controllerMap.getAxisMap("drive:left_y", "gamepad1", "left_stick_y");
         ax_drive_right_x = controllerMap.getAxisMap("drive:right_x", "gamepad1", "right_stick_x");
         ax_slow = controllerMap.getAxisMap("drive:slow", "gamepad1", "left_trigger");
-
-        ax_horizontal_left_x = controllerMap.getAxisMap("horizontal:left_x", "gamepad2", "left_stick_x");
-
-        dpad_up = controllerMap.getButtonMap("drive:dpad_up", "gamepad1","dpad_up");
-        dpad_down = controllerMap.getButtonMap("drive:dpad_down", "gamepad1","dpad_down");
-        dpad_left = controllerMap.getButtonMap("drive:dpad_left", "gamepad1","dpad_left");
-        dpad_right = controllerMap.getButtonMap("drive:dpad_right", "gamepad1","dpad_right");
-
-        guide = controllerMap.getButtonMap("drive:guide", "gamepad1","guide");
 
         drivetrain.resetEncoders();
     }

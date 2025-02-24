@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.Arm;
-import org.firstinspires.ftc.teamcode.hardware.Intake;
 import org.firstinspires.ftc.teamcode.hardware.Lift;
 import org.firstinspires.ftc.teamcode.hardware.Robot;
 import org.firstinspires.ftc.teamcode.hardware.navigation.PID;
@@ -11,7 +10,6 @@ import org.firstinspires.ftc.teamcode.input.ControllerMap;
 public class ArmControl extends ControlModule {
 
     private Arm arm;
-    private Intake intake;
     private Lift lift;
 
     private ControllerMap.AxisEntry right_stick_y;
@@ -31,7 +29,6 @@ public class ArmControl extends ControlModule {
     @Override
     public void initialize(Robot robot, ControllerMap controllerMap, ControlMgr manager) {
         this.arm = robot.arm;
-        this.intake = robot.intake;
         this.lift = robot.lift;
 
         right_stick_y = controllerMap.getAxisMap("arm:horizontal", "gamepad1", "right_stick_y");

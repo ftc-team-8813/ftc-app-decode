@@ -18,10 +18,12 @@ public class DepositTest extends LoggingOpMode {
 
     private Servo deposit_rotator_left;
     private Servo deposit_rotator_right;
+    private Servo deposit_claw;
 
 
     public static double left_pos = 0;
     public static double right_pos = 0;
+    public static double claw_pos = 0;
 
 //    private final PID pid = new PID(kp, ki, 0, kf, mxis, 0);
 
@@ -30,6 +32,7 @@ public class DepositTest extends LoggingOpMode {
 
         deposit_rotator_left = hardwareMap.get(Servo.class, "leftDepo");
         deposit_rotator_right = hardwareMap.get(Servo.class, "rightDepo");
+        deposit_claw = hardwareMap.get(Servo.class, "claw");
 
         deposit_rotator_left.setDirection(Servo.Direction.REVERSE);
 
@@ -43,9 +46,8 @@ public class DepositTest extends LoggingOpMode {
 
         deposit_rotator_left.setPosition(left_pos);
         deposit_rotator_right.setPosition(right_pos);
+        deposit_claw.setPosition(claw_pos);
 
-        telemetry.addData("Left Position",left_pos);
-        telemetry.addData("Right Position",right_pos);
         telemetry.update();
     }
 }

@@ -18,7 +18,6 @@ public class Robot {
     public Lift lift;
     public Deposit deposit;
     public Arm arm;
-    public Intake intake;
     public IMU imu;
 
     public EventBus eventBus = new EventBus();
@@ -55,11 +54,14 @@ public class Robot {
         Servo deposit_claw = hardwareMap.get(Servo.class, "claw");
         Servo deposit_rotator_left = hardwareMap.get(Servo.class, "leftDepo");
         Servo deposit_rotator_right = hardwareMap.get(Servo.class, "rightDepo");
-        Servo arm_rotator = hardwareMap.get(Servo.class, "arm rotator");
-        Servo arm_lower = hardwareMap.get(Servo.class, "arm lower");
-        Servo arm_upper = hardwareMap.get(Servo.class, "arm upper");
-        Servo intake_rotator = hardwareMap.get(Servo.class, "intake rotator");
-        Servo intake_claw = hardwareMap.get(Servo.class, "intake claw");
+        Servo arm_lower_left = hardwareMap.get(Servo.class, "arm lower left");
+        Servo arm_lower_right = hardwareMap.get(Servo.class, "arm lower right");
+        Servo arm_upper_left = hardwareMap.get(Servo.class, "arm upper left");
+        Servo arm_upper_right = hardwareMap.get(Servo.class, "arm upper right");
+        Servo arm_claw = hardwareMap.get(Servo.class, "arm claw");
+        Servo arm_claw_rotator = hardwareMap.get(Servo.class, "arm claw rotator");
+        Servo hang_winch_left = hardwareMap.get(Servo.class, "hang winch left");
+        Servo hang_winch_right = hardwareMap.get(Servo.class, "hang winch right");
 
         // Sensors
         BNO055IMU imu_sensor = null/*hardwareMap.get(BHI260IMU.class, "imu")*/;
@@ -68,10 +70,7 @@ public class Robot {
         // Sub-Assemblies
         this.drivetrain = new Drivetrain(front_left, front_right, back_left, back_right, odometry);
         this.deposit = new Deposit(deposit_claw, deposit_rotator_left, deposit_rotator_right);
-        this.lift = new Lift(lift_left, lift_right);
-
-        this.arm = new Arm(horizontal, arm_rotator, arm_lower, arm_upper);
-        this.intake = new Intake(intake_rotator, intake_claw);
-
+        this.lift = new Lift(lift_left, lift_right, hang_winch_left, hang_winch_right);
+        this.arm = new Arm(horizontal, arm_lower_left, arm_lower_right, arm_upper_left, arm_upper_right, arm_claw, arm_claw_rotator);
     }
 }

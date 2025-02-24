@@ -32,11 +32,14 @@ public class RightAuto extends LoggingOpMode {
     public static double kf = 0.0125;
     public static double maxIntegralSum = 0;
 
+    private boolean reset_init = false;
+
     private final PID lift_PID = new PID(kp, ki, kd, kf, maxIntegralSum, 0);
 
     private final ElapsedTime deposit_timer = new ElapsedTime();
     private final ElapsedTime specimen_pickup_timer = new ElapsedTime();
     private final ElapsedTime timer = new ElapsedTime();
+    private final ElapsedTime init_timer = new ElapsedTime();
 
     private final ElapsedTime lift_trapezoid = new ElapsedTime();
     private final double lift_accel = 0.1;
@@ -44,14 +47,15 @@ public class RightAuto extends LoggingOpMode {
     private double lift_power;
     private double lift_clip = 0.8;
 
-    private final double lift_high_chamber = 1849;
+    private final double lift_high_chamber = 1870;
     private final double lift_low_chamber = 328;
     private final double lift_down = 8;
     private final double deposit_up = 0.4;
-    private final double deposit_normal = 0.59;
-    private final double deposit_down = 0.7;
-    private final double deposit_claw_closed = 0.218;
-    private final double deposit_claw_open = 0.678;
+    private final double deposit_normal = 0.28;
+    private final double deposit_down = 0.2;
+    private final double deposit_init = 1;
+    private final double deposit_claw_closed = 0.65;
+    private final double deposit_claw_open = 0;
 
 
     private final Logger log = new Logger("Right Auto");
@@ -71,12 +75,36 @@ public class RightAuto extends LoggingOpMode {
 
         drivetrain.resetEncoders();
         deposit.setClawPosition(deposit_claw_closed);
-        deposit.setRotatorPosition(0.68);
+    }
+
+    @Override
+    public void init_loop() {
+        super.init_loop();
+
+        if (!reset_init) {
+            init_timer.reset();
+            reset_init = true;
+        }
+
+        if (init_timer.seconds() < 3) {
+            lift.setPower(-0.35);
+            deposit.setRotatorPosition(0.9);
+            lift.resetEncoders();
+        }
+        else {
+            deposit.setRotatorPosition(deposit_init);
+            lift_target = 490; //446
+            lift_power = Range.clip((lift_PID.getOutPut(lift_target, lift.getCurrentPosition(), 1) * Math.min(lift_trapezoid.seconds() * lift_accel, 1)), -0.6, lift_clip);
+            lift.setPower(lift_power);
+        }
+
+        telemetry.addData("Lift Position", lift.getCurrentPosition());
     }
 
     @Override
     public void start() {
         super.start();
+        deposit.setRotatorPosition(deposit_normal);
         lift_target = lift_high_chamber;
         timer.reset();
     }
@@ -89,7 +117,7 @@ public class RightAuto extends LoggingOpMode {
         switch (main_id) {
             case 0:
                 if (timer.seconds() > 1.5) {
-                    drivetrain.autoMove(670, -160, 0, 10, 10, 2);
+                    drivetrain.autoMove(100, 362, 0, 10, 10, 2);
                     if (drivetrain.hasReached()) {
                         deposit.setRotatorPosition(deposit_normal);
                         main_id += 1;
@@ -97,27 +125,34 @@ public class RightAuto extends LoggingOpMode {
                 }
                 break;
             case 1:
-                deposit.setRotatorPosition(deposit_down);
-                lift_target = 1200;
+                drivetrain.autoMove(100, 560, 90, 10, 10, 2);
+                if (drivetrain.hasReached()) {
+                        main_id += 1;
+                }
+                break;
+            case 2:
+                deposit.setRotatorPosition(0.4);
+                lift_target = lift_target + 400;
                 deposit_timer.reset();
                 main_id += 1;
                 break;
-            case 2:
+            case 3:
                 if (deposit_timer.seconds() > 0.9) {
                     lift_target = lift_down;
                     deposit.setClawPosition(deposit_claw_open);
+                    deposit.setRotatorPosition(0.865);
                 }
                 if (deposit_timer.seconds() > 1.5) {
-                    main_id += 1;
+//                    main_id += 1;
                 }
                 break;
-            case 3:
+            case 4:
                 drivetrain.autoMove(100,800,0,10,10,2); //
                 if (drivetrain.hasReached()) {
 //                    main_id += 1;
                 }
                 break;
-            case 4:
+            case 5:
                 drivetrain.autoMove(300,840,180,10,10,2);
                 if (drivetrain.hasReached()) {
                     deposit.setRotatorPosition(deposit_normal);
@@ -125,7 +160,7 @@ public class RightAuto extends LoggingOpMode {
                     main_id += 1;
                 }
                 break;
-            case 5:
+            case 6:
                 drivetrain.autoMove(210,840,180,10,10,2);
                 if (drivetrain.hasReached() && timer.seconds() > 2.5) {
                     deposit.setClawPosition(deposit_claw_closed);
@@ -133,13 +168,13 @@ public class RightAuto extends LoggingOpMode {
                     main_id += 1;
                 }
                 break;
-            case 6:
+            case 7:
                 if (specimen_pickup_timer.seconds() > 0.5) {
                     deposit.setRotatorPosition(deposit_up);
                     main_id += 1;
                 }
                 break;
-            case 7:
+            case 8:
                 drivetrain.autoMove(300,-260,180,10,10,2);
                 if (drivetrain.hasReached()) {
                     main_id += 1;
@@ -148,13 +183,13 @@ public class RightAuto extends LoggingOpMode {
                     timer.reset();
                 }
                 break;
-            case 8:
+            case 9:
                 drivetrain.autoMove(300,-260,0,10,10,2);
                 if (drivetrain.hasReached()) {
                     main_id += 1;
                 }
                 break;
-            case 9:
+            case 10:
                 if (timer.seconds() > 1.5) {
                     drivetrain.autoMove(700, -260, 0, 10, 10, 2);
                     if (drivetrain.hasReached()) {
@@ -162,13 +197,13 @@ public class RightAuto extends LoggingOpMode {
                     }
                 }
                 break;
-            case 10:
+            case 11:
                 deposit.setRotatorPosition(deposit_down);
                 lift_target = 1200;
                 deposit_timer.reset();
                 main_id += 1;
                 break;
-            case 11:
+            case 12:
                 if (deposit_timer.seconds() > 0.9) {
                     lift_target = lift_down;
                     deposit.setClawPosition(deposit_claw_open);
@@ -177,7 +212,7 @@ public class RightAuto extends LoggingOpMode {
                     main_id += 1;
                 }
                 break;
-            case 12:
+            case 13:
                 drivetrain.autoMove(100,800,0,10,10,2);
                 if (drivetrain.hasReached()) {
                     main_id += 1;
