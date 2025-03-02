@@ -22,7 +22,7 @@ public class LiftControl extends ControlModule {
     private Deposit deposit;
     private Arm arm;
 
-    public static double kp = 0.03;
+    public static double kp = 0.02;
     public static double ki = 0;
     public static double kd = 0;
     public static double kf = 0.0125;
@@ -67,17 +67,21 @@ public class LiftControl extends ControlModule {
     private ControllerMap.ButtonEntry hang_button;
     private ControllerMap.ButtonEntry arm_out_button;
     private ControllerMap.ButtonEntry pick_up_button;
+    private ControllerMap.ButtonEntry just_pick_up_button;
+    private ControllerMap.ButtonEntry arm_claw_button;
+    private ControllerMap.ButtonEntry arm_left_button;
+    private ControllerMap.ButtonEntry arm_right_button;
 
     private ControllerMap.AxisEntry ax_horizontal_adjust;
     private ControllerMap.AxisEntry ax_lift_adjust;
 
-    private final double lift_high_chamber_position = 1870;
+    private final double lift_high_chamber_position = 1540;
     private final double lift_low_chamber_position  = 328;
     private final double lift_ground_position = 8;
-    private final double deposit_rotator_ground_position = 0.28;
-    private final double deposit_scoring_position = 0.4;
+    private final double deposit_rotator_ground_position = 0.32;
+    private final double deposit_scoring_position = 0.6;
     private final double deposit_specimen_pickup_position = 0.8;
-    private final double deposit_intake_position = 0.865;
+    private final double deposit_intake_position = 0.872;
     private final double deposit_hang_position = 0.8;
     private final double deposit_claw_closed = 0.63;
     private final double deposit_claw_open = 0.97;
@@ -86,8 +90,8 @@ public class LiftControl extends ControlModule {
     private final double arm_lower_out_position = 0.153;
     private final double arm_upper_out_position = 1;
     private final double arm_lower_picking_up_position = 0.14;
-    public static double arm_lower_transfer_position = 0.278;
-    public static double arm_upper_transfer_position = 0.4;
+    public static double arm_lower_transfer_position = 0.27;
+    public static double arm_upper_transfer_position = 0.42;
     private final double arm_lower_post_transfer_position = 0.26;
     private final double arm_claw_rotator_standard_position = 0.36;
     private final double arm_lower_pre_transfer_position = 0.2;
@@ -95,7 +99,7 @@ public class LiftControl extends ControlModule {
     private final double arm_claw_closed_position = 0.63;
     private final double arm_claw_open_position = 0;
     private final double arm_claw_semi_open_position = 0.42;
-    public static double deposit_rotator_transfer_position = 0.97;
+    public static double deposit_rotator_transfer_position = 0.95;
 
 //    private final double arm_lower_pick_up_position = 0;
 //    private final double arm_upper_pick_up_position = 0;
@@ -123,6 +127,11 @@ public class LiftControl extends ControlModule {
 
         arm_out_button = controllerMap.getButtonMap("arm:out", "gamepad2","a");
         pick_up_button = controllerMap.getButtonMap("intake:pick_up", "gamepad2","x");
+        just_pick_up_button = controllerMap.getButtonMap("intake:just_pick_up", "gamepad2","b");
+        arm_claw_button = controllerMap.getButtonMap("intake:arm_claw_button", "gamepad2","y");
+
+        arm_left_button = controllerMap.getButtonMap("intake:arm_left_button", "gamepad2","dpad_left");
+        arm_right_button = controllerMap.getButtonMap("intake:arm_right_button", "gamepad2","dpad_right");
 
         ax_horizontal_adjust = controllerMap.getAxisMap("horizontal:fine_adjust", "gamepad2", "left_stick_y");
         ax_lift_adjust = controllerMap.getAxisMap("lift:fine_adjust", "gamepad2", "right_stick_y");
@@ -159,6 +168,43 @@ public class LiftControl extends ControlModule {
     @Override
     public void update(Telemetry telemetry) {
 
+        if (arm_right_button.edge() == -1) {
+            arm.setClawRotatorPosition(arm.getClawRotatorPosition() - 0.125);
+        }
+
+        if (arm_left_button.edge() == -1) {
+            arm.setClawRotatorPosition(arm.getClawRotatorPosition() + 0.125);
+        }
+
+        if (just_pick_up_button.edge() == -1) {
+            intake_justgrab_sequence = 0;
+        }
+
+        if (arm_claw_button.edge() == -1) {
+            arm.setClawPosition(arm_claw_open_position);
+        }
+
+        switch (intake_justgrab_sequence) {
+            case 0:
+                arm.setLowerPosition(arm_lower_picking_up_position);
+                if (intake_timer.seconds() > 0.5) {
+                    intake_timer.reset();
+                    intake_justgrab_sequence += 1;
+                }
+                break;
+            case 1:
+                arm.setClawPosition(arm_claw_closed_position);
+                if (intake_timer.seconds() > 0.5) {
+                    intake_justgrab_sequence += 1;
+                }
+                break;
+            case 2:
+                arm.setLowerPosition(arm_lower_pre_transfer_position);
+                arm.setUpperPosition(arm_upper_pre_transfer_position);
+                intake_justgrab_sequence += 1;
+                break;
+        }
+
         if (high_bucket_button.edge() == -1) {
             lift_target = 2550;
             deposit.setRotatorPosition(0.47);
@@ -190,8 +236,6 @@ public class LiftControl extends ControlModule {
         if (hang_button.edge() == -1) {
             lift_target = lift_ground_position;
             deposit.setRotatorPosition(deposit_hang_position);
-            lift.setWinchRightPosition(1);
-            lift.setWinchLeftPosition(1);
         }
 
 
@@ -254,13 +298,13 @@ public class LiftControl extends ControlModule {
 
         switch (score_sequence) {
             case 0:
-                lift_target = lift_target + 400;
+                lift_target = lift_target + 750;
                 deposit.setRotatorPosition(deposit_scoring_position);
                 scoring_timer.reset();
                 score_sequence += 1;
                 break;
             case 1:
-                if (scoring_timer.seconds() > 0.9) {
+                if (scoring_timer.seconds() > 1.5) { //2
                     is_deposit_claw_closed = false;
                     lift_target = lift_ground_position;
                     deposit.setRotatorPosition(deposit_intake_position);
@@ -279,6 +323,8 @@ public class LiftControl extends ControlModule {
 
         if (pick_up_button.edge() == -1) {
 //            horizontal_target = horizontal_transfer_position;
+            lift_target = lift_ground_position;
+            deposit.setRotatorPosition(deposit_rotator_ground_position);
             intake_sequence = 0;
             intake_timer.reset();
         }

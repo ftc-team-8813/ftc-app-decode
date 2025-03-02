@@ -124,7 +124,7 @@ public class ArmTest extends LoggingOpMode {
 //        horizontal_power = horizontal_pid.getOutPut(horizontal_target, horizontal.getCurrentPosition(),0);
 //        horizontal.setPower(horizontal_power);
 
-        lift_power = Range.clip((lift_PID.getOutPut(lift_target, lift_left.getCurrentPosition(), 1) * Math.min(lift_trapezoid_timer.seconds() * lift_accel, 1)), -0.6, lift_clip);
+        lift_power = Range.clip((lift_PID.getOutPut(lift_target, -lift_right.getCurrentPosition(), 1) * Math.min(lift_trapezoid_timer.seconds() * lift_accel, 1)), -0.6, lift_clip);
 
         lift_left.setPower(lift_power);
         lift_right.setPower(-lift_power);

@@ -41,15 +41,15 @@ public class Drivetrain {
 
     private boolean has_reached;
 
-    public static double forward_kp = 0.0042;
-    public static double forward_ki = 0.003; //0.02
-    public static double forward_kd = 0.0005; //0.0004
+    public static double forward_kp = 0.0052;
+    public static double forward_ki = 0.0035; //0.02
+    public static double forward_kd = 0.00052; //0.0004
     public static double forward_a = 0.8;
-    public static double strafe_kp = 0.0093; //0.0095
-    public static double strafe_ki = 0.005;
-    public static double strafe_kd = 0.0004;
+    public static double strafe_kp = 0.012; //0.0095
+    public static double strafe_ki = 0.006;
+    public static double strafe_kd = 0.0005;
     public static double strafe_a = 0.8;
-    public static double turn_kp = 0.0265;
+    public static double turn_kp = 0.0268;
     public static double turn_ki = 0.0034;
     public static double turn_kd = 0.0016;
     public static double turn_a = 0.8;
@@ -59,8 +59,8 @@ public class Drivetrain {
     public static double stf_kf = 0;
     public static double trn_kf = 0;
 
-    private final PID forward_pid = new PID(forward_kp,forward_ki,forward_kd,fwd_kf,1,forward_a);
-    private final PID strafe_pid = new PID(strafe_kp,strafe_ki,strafe_kd,stf_kf,1,strafe_a);
+    private final PID strafe_pid = new PID(forward_kp,forward_ki,forward_kd,fwd_kf,1,forward_a); //x
+    private final PID forward_pid = new PID(strafe_kp,strafe_ki,strafe_kd,stf_kf,1,strafe_a); //y
     private final PID turn_pid = new PID(turn_kp,turn_ki,turn_kd,trn_kf,turn_max_i_sum,turn_a);
 
     public static double rise_slope = 0.1;
@@ -252,9 +252,15 @@ public class Drivetrain {
             heading_delta += 360;
         }
 
-        y = -odometry.getPosY();
-        x = odometry.getPosX();
-        rot = Math.toDegrees(odometry.getHeading());
+        if (!Double.isNaN(odometry.getPosY())) {
+            y = -odometry.getPosY();
+        }
+        if (!Double.isNaN(odometry.getPosX())) {
+            x = odometry.getPosX();
+        }
+        if (!Double.isNaN(odometry.getHeading())) {
+            rot = Math.toDegrees(odometry.getHeading());
+        }
 
         if(Math.signum(-heading) == -1) {
             rot = ((-heading) + 360);
@@ -269,20 +275,19 @@ public class Drivetrain {
             rot -= 360;
         }
 
-        forward_power = forward_pid.getOutPut(forward,x,feed_forward);
-        strafe_power = strafe_pid.getOutPut(strafe,y,feed_forward);
-        turn_power = Range.clip((turn_pid.getOutPut(turn, rot, feed_forward)),-turn_clip,turn_clip);
+        forward_power = Range.clip(forward_pid.getOutPut(forward,x,feed_forward),-0.9,0.9);
+        strafe_power = Range.clip(strafe_pid.getOutPut(strafe,y,feed_forward),-0.9,0.9);
+        turn_power = Range.clip((turn_pid.getOutPut(turn, rot, feed_forward)),-0.9,0.9);
 
         botHeading = -1* Math.toRadians(heading);
 
-        rotX = /*0.4 **/ (strafe_power * Math.cos(botHeading) - forward_power * Math.sin(botHeading));
-        rotY = /*0.4 **/ (strafe_power * Math.sin(botHeading) + forward_power * Math.cos(botHeading));
+        rotX = (strafe_power * Math.cos(botHeading) - forward_power * Math.sin(botHeading));
+        rotY = (strafe_power * Math.sin(botHeading) + forward_power * Math.cos(botHeading));
 
         denominator = Math.max(Math.abs(forward_power) + Math.abs(strafe_power) + Math.abs(turn_power), 1);
 
-        if (move) {
-            move(rotY, rotX, turn_power, (heading_delta * 0.001), denominator);
-        }
+        move(rotY, rotX, turn_power, (heading_delta * 0.001), denominator);
+
 
         move = true;
 

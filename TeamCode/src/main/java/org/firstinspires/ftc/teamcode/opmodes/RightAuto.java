@@ -26,7 +26,7 @@ public class RightAuto extends LoggingOpMode {
 
     private FtcDashboard dashboard;
 
-    public static double kp = 0.03;
+    public static double kp = 0.020;
     public static double ki = 0;
     public static double kd = 0;
     public static double kf = 0.0125;
@@ -40,6 +40,7 @@ public class RightAuto extends LoggingOpMode {
     private final ElapsedTime specimen_pickup_timer = new ElapsedTime();
     private final ElapsedTime timer = new ElapsedTime();
     private final ElapsedTime init_timer = new ElapsedTime();
+    private final ElapsedTime limit_timer = new ElapsedTime();
 
     private final ElapsedTime lift_trapezoid = new ElapsedTime();
     private final double lift_accel = 0.1;
@@ -47,15 +48,15 @@ public class RightAuto extends LoggingOpMode {
     private double lift_power;
     private double lift_clip = 0.8;
 
-    private final double lift_high_chamber = 1870;
+    private final double lift_high_chamber = 1550;
     private final double lift_low_chamber = 328;
     private final double lift_down = 8;
     private final double deposit_up = 0.4;
-    private final double deposit_normal = 0.28;
+    private final double deposit_normal = 0.32;
     private final double deposit_down = 0.2;
     private final double deposit_init = 1;
-    private final double deposit_claw_closed = 0.65;
-    private final double deposit_claw_open = 0;
+    private final double deposit_claw_closed = 0.63;
+    private final double deposit_claw_open = 1;
 
 
     private final Logger log = new Logger("Right Auto");
@@ -92,10 +93,13 @@ public class RightAuto extends LoggingOpMode {
             lift.resetEncoders();
         }
         else {
-            deposit.setRotatorPosition(deposit_init);
             lift_target = 490; //446
             lift_power = Range.clip((lift_PID.getOutPut(lift_target, lift.getCurrentPosition(), 1) * Math.min(lift_trapezoid.seconds() * lift_accel, 1)), -0.6, lift_clip);
             lift.setPower(lift_power);
+        }
+
+        if (init_timer.seconds() > 4.5) {
+            deposit.setRotatorPosition(deposit_init);
         }
 
         telemetry.addData("Lift Position", lift.getCurrentPosition());
@@ -117,103 +121,108 @@ public class RightAuto extends LoggingOpMode {
         switch (main_id) {
             case 0:
                 if (timer.seconds() > 1.5) {
-                    drivetrain.autoMove(100, 362, 0, 10, 10, 2);
-                    if (drivetrain.hasReached()) {
-                        deposit.setRotatorPosition(deposit_normal);
+                    drivetrain.autoMove(100, 200, 0, 20, 30, 2);
+                    if (drivetrain.hasReached() || timer.seconds() > 3) {
+                        deposit.setRotatorPosition(0.28);
+                        limit_timer.reset();
                         main_id += 1;
                     }
                 }
                 break;
             case 1:
-                drivetrain.autoMove(100, 560, 90, 10, 10, 2);
-                if (drivetrain.hasReached()) {
-                        main_id += 1;
+                drivetrain.autoMove(150, 200, 90, 30, 30, 2);
+                if (drivetrain.hasReached() || limit_timer.seconds() > 1.2) {
+                    main_id += 1;
+                    timer.reset();
                 }
                 break;
             case 2:
-                deposit.setRotatorPosition(0.4);
-                lift_target = lift_target + 400;
+                drivetrain.autoMove(150, 583, 90, 10, 10, 2);
+                if (drivetrain.hasReached() || timer.seconds() > 2.0) {
+                    main_id += 1;
+                }
+                break;
+            case 3:
+                deposit.setRotatorPosition(0.6);
+                lift_target = lift_target + 750;
                 deposit_timer.reset();
                 main_id += 1;
                 break;
-            case 3:
-                if (deposit_timer.seconds() > 0.9) {
-                    lift_target = lift_down;
-                    deposit.setClawPosition(deposit_claw_open);
-                    deposit.setRotatorPosition(0.865);
-                }
-                if (deposit_timer.seconds() > 1.5) {
-//                    main_id += 1;
-                }
-                break;
             case 4:
-                drivetrain.autoMove(100,800,0,10,10,2); //
-                if (drivetrain.hasReached()) {
-//                    main_id += 1;
+                if (deposit_timer.seconds() > 1.35) {
+                    deposit.setClawPosition(deposit_claw_open);
+                    deposit_timer.reset();
+                    main_id += 1;
                 }
                 break;
             case 5:
-                drivetrain.autoMove(300,840,180,10,10,2);
-                if (drivetrain.hasReached()) {
-                    deposit.setRotatorPosition(deposit_normal);
-                    timer.reset();
+                if (deposit_timer.seconds() > 1.1) {
+                    lift_target = lift_down;
+                    deposit.setRotatorPosition(0.865);
                     main_id += 1;
+                    limit_timer.reset();
                 }
                 break;
             case 6:
-                drivetrain.autoMove(210,840,180,10,10,2);
-                if (drivetrain.hasReached() && timer.seconds() > 2.5) {
-                    deposit.setClawPosition(deposit_claw_closed);
-                    specimen_pickup_timer.reset();
+                drivetrain.autoMove(-700,250,90,20,15,2); // back
+                if (drivetrain.hasReached()) {
                     main_id += 1;
+                    timer.reset();
                 }
                 break;
             case 7:
-                if (specimen_pickup_timer.seconds() > 0.5) {
-                    deposit.setRotatorPosition(deposit_up);
+                if (timer.seconds() > 2) {
+                    timer.reset();
                     main_id += 1;
                 }
                 break;
             case 8:
-                drivetrain.autoMove(300,-260,180,10,10,2);
-                if (drivetrain.hasReached()) {
-                    main_id += 1;
-                    deposit.setRotatorPosition(deposit_normal);
-                    lift_target = lift_high_chamber;
+                drivetrain.autoMove(-700,100,90,10,10,2); // pick up 2nd preload specimen
+                if (drivetrain.hasReached() || timer.seconds() > 3) {
+                    deposit.setClawPosition(deposit_claw_closed);
                     timer.reset();
+                    main_id += 1;
                 }
                 break;
             case 9:
-                drivetrain.autoMove(300,-260,0,10,10,2);
-                if (drivetrain.hasReached()) {
+                if (timer.seconds() > 0.7) {
+                    deposit.setRotatorPosition(deposit_normal);
+                }
+                if (timer.seconds() > 1.2) {
+                    lift_target = lift_high_chamber;
                     main_id += 1;
                 }
                 break;
             case 10:
-                if (timer.seconds() > 1.5) {
-                    drivetrain.autoMove(700, -260, 0, 10, 10, 2);
-                    if (drivetrain.hasReached()) {
-                        main_id += 1;
-                    }
+                drivetrain.autoMove(200,300,90,10,10,2); // navigate to high chamber
+                if (drivetrain.hasReached()) {
+                    main_id += 1;
                 }
                 break;
             case 11:
-                deposit.setRotatorPosition(deposit_down);
-                lift_target = 1200;
+                drivetrain.autoMove(200,583,90,10,10,2); // navigate to high chamber
+                if (drivetrain.hasReached()) {
+                    main_id += 1;
+                }
+                break;
+            case 12:
+                deposit.setRotatorPosition(0.6);
+                lift_target = lift_target + 400;
                 deposit_timer.reset();
                 main_id += 1;
                 break;
-            case 12:
+            case 13:
                 if (deposit_timer.seconds() > 0.9) {
                     lift_target = lift_down;
                     deposit.setClawPosition(deposit_claw_open);
+                    deposit.setRotatorPosition(0.872);
                 }
                 if (deposit_timer.seconds() > 1.5) {
                     main_id += 1;
                 }
                 break;
-            case 13:
-                drivetrain.autoMove(100,800,0,10,10,2);
+            case 14:
+                drivetrain.autoMove(-600,1100,90,10,10,2); // navigate to observation zone
                 if (drivetrain.hasReached()) {
                     main_id += 1;
                 }
@@ -229,6 +238,8 @@ public class RightAuto extends LoggingOpMode {
         telemetry.addData("Lift Power", lift_power);
         telemetry.addData("Lift Current", lift.getCurrentPosition());
         telemetry.addData("Lift Position", lift.getCurrentPosition());
+        telemetry.addData("Claw Position", deposit.getClawPosition());
+        telemetry.addData("Main ID", main_id);
         telemetry.addData("Loop Time: ", LoopTimer.getLoopTime());
         telemetry.update();
 

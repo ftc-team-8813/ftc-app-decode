@@ -58,4 +58,8 @@ public class Arm {
     public void setClawRotatorPosition(double pos) {
         arm_claw_rotator.setPosition(pos);
     }
+
+    public double getClawRotatorPosition() {
+        return  arm_claw_rotator.getPosition();
+    }
 }
